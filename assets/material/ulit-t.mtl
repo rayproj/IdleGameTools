@@ -4,28 +4,14 @@
   "_objFlags": 0,
   "_native": "",
   "_effectAsset": {
-    "__uuid__": "db6c7bef-84aa-41a7-a07f-fd460e68802d",
+    "__uuid__": "a3cd009f-0ab0-420d-9278-b9fdab939bbc",
     "__expectedType__": "cc.EffectAsset"
   },
-  "_techIdx": 0,
+  "_techIdx": 1,
   "_defines": [
-    {
-      "USE_INSTANCING": true
-    },
-    {
-      "USE_INSTANCING": true
-    }
+    {}
   ],
   "_states": [
-    {
-      "rasterizerState": {},
-      "depthStencilState": {},
-      "blendState": {
-        "targets": [
-          {}
-        ]
-      }
-    },
     {
       "rasterizerState": {},
       "depthStencilState": {},
@@ -37,14 +23,13 @@
     }
   ],
   "_props": [
-    {},
     {
       "mainColor": {
         "__type__": "cc.Color",
-        "r": 187,
-        "g": 187,
-        "b": 187,
-        "a": 255
+        "r": 121,
+        "g": 255,
+        "b": 255,
+        "a": 176
       }
     }
   ]

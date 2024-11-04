@@ -84,7 +84,7 @@ void surf(out CarToonSurface s) {
     // spec = pow(spec * 0.5 + 0.5, 8.0);
     spec = spec * 0.5 + 0.5;
     spec = step(colorScaleAndCutoff.x, spec);
-    vec3 specular = step(0.01, cc_mainLitColor.w) * spec * specColor.rgb;
+    vec3 specular = cc_mainLitColor.rgb * spec * specColor.rgb;
     color.rgb += specular;
   #endif
 

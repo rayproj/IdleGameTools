@@ -1,4 +1,5 @@
 import { _decorator, Component, find, Node, v3, Vec3 } from 'cc';
+import { VecUtils } from './VecUtils';
 const { ccclass, property, executeInEditMode } = _decorator;
 
 const t_vec = v3();
@@ -35,7 +36,7 @@ export class Billboard2D extends Component {
         const followNode = this.followNode;
         if (followNode) {
             const tPos = followNode.getWorldPosition(t_vec);
-            if (!this._currPos.equals(tPos)) {
+            if (!VecUtils.equalsVec3(this._currPos, tPos)) {
                 this._currPos.set(tPos);
                 tPos.add(this.followOffset);
                 this.node.setWorldPosition(tPos);

@@ -1,4 +1,5 @@
 import { _decorator, Camera, Component, find, Node, NodeEventType, TransformBit, v3, Vec3 } from 'cc';
+import { VecUtils } from './VecUtils';
 const { ccclass, property } = _decorator;
 
 const t_vec = v3();
@@ -39,10 +40,10 @@ export class UIFollow extends Component {
             const cPos = camera.node.getWorldPosition(t_vec2)
             const cFov = camera.fov;
             let sync = false;
-            if (!this._currPos.equals(tPos)) {
+            if (!VecUtils.equalsVec3(this._currPos, tPos)) {
                 this._currPos.set(tPos);
                 sync = true;
-            } else if (!this._currCameraPos.equals(cPos)) {
+            } else if (!VecUtils.equalsVec3(this._currCameraPos, cPos)) {
                 this._currCameraPos.set(cPos);
                 sync = true;
             } else if (this._currCameraFov !== cFov) {

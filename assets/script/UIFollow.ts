@@ -31,24 +31,32 @@ export class UIFollow extends Component {
             const pos = this.followNode.getWorldPosition(this._currPos);
             pos.x -= 100;
         }
+        this.scheduleOnce(() => {
+            this.syncFollow(true);
+        });
     }
 
-    protected update(dt: number): void {
+    protected lateUpdate(dt: number): void {
+        this.syncFollow(false);
+    }
+
+    private syncFollow(sync: boolean) {
         const followNode = this.followNode, camera = this.camera;
         if (followNode && camera) {
             const tPos = followNode.getWorldPosition(t_vec);
             const cPos = camera.node.getWorldPosition(t_vec2)
             const cFov = camera.fov;
-            let sync = false;
-            if (!VecUtils.equalsVec3(this._currPos, tPos)) {
-                this._currPos.set(tPos);
-                sync = true;
-            } else if (!VecUtils.equalsVec3(this._currCameraPos, cPos)) {
-                this._currCameraPos.set(cPos);
-                sync = true;
-            } else if (this._currCameraFov !== cFov) {
-                this._currCameraFov = cFov;
-                sync = true;
+            if (!sync) {
+                if (!VecUtils.equalsVec3(this._currPos, tPos)) {
+                    this._currPos.set(tPos);
+                    sync = true;
+                } else if (!VecUtils.equalsVec3(this._currCameraPos, cPos)) {
+                    this._currCameraPos.set(cPos);
+                    sync = true;
+                } else if (this._currCameraFov !== cFov) {
+                    this._currCameraFov = cFov;
+                    sync = true;
+                }
             }
             if (sync) {
                 camera.convertToUINode(tPos, this.node.parent, t_vec);

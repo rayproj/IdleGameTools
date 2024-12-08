@@ -1,0 +1,128 @@
+// Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+CCEffect %{
+  techniques:
+  - name: transparent
+    passes:
+    - vert: water-vs:vert
+      frag: water-fs:frag
+      depthStencilState:
+        depthTest: true
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties:
+        shallowColor:     { value: [1, 1, 1, 1], editor: { type: color } }
+        deepColor:        { value: [1, 1, 1, 1], editor: { type: color } }
+        foamTexture:      { value: grey }
+        waterNormal:      { value: normal }
+        waveScale:        { value: [1, 1], target: otherParams.yz }
+        waveParams:       { value: [0, 0, 0, 0] }
+        normalScale:      { value: 1.0, target: otherParams.x }
+}%
+
+CCProgram water-vs %{
+  precision highp float;
+
+  #include <legacy/input-standard>
+  #include <builtin/uniforms/cc-global>
+  #include <legacy/local-batch>
+  #include <legacy/fog-vs>
+
+  out vec2 v_uv;
+  out vec3 v_worldPos;
+  out vec3 v_TW0;
+  out vec3 v_TW1;
+  out vec3 v_TW2;
+
+  vec4 vert () {
+    StandardVertInput In;
+    CCVertInput(In);
+
+    mat4 matWorld, matWorldIT;
+    CCGetWorldMatrixFull(matWorld, matWorldIT);
+
+    vec4 worldPos = matWorld * In.position;
+
+    v_uv = a_texCoord;
+    v_worldPos = worldPos.xyz;
+    vec3 worldNormal = normalize((matWorldIT * vec4(In.normal, 0.0)).xyz);
+    vec3 worldTangent = normalize((matWorld * vec4(In.tangent.xyz, 0.0)).xyz);
+    vec3 worldBinormal = cross(worldNormal, worldTangent) * In.tangent.w * (In.tangent.w > 0.0 ? 1.0 : -1.0);
+    v_TW0 = vec3(worldTangent.x, worldBinormal.x, worldNormal.x);
+    v_TW1 = vec3(worldTangent.y, worldBinormal.y, worldNormal.y);
+    v_TW2 = vec3(worldTangent.z, worldBinormal.z, worldNormal.z);
+
+    CC_TRANSFER_FOG(worldPos);
+    return cc_matProj * cc_matView * worldPos;
+  }
+}%
+
+CCProgram water-fs %{
+  precision highp float;
+  // #include <legacy/output-standard>
+  #include <legacy/fog-fs>
+  #include <builtin/uniforms/cc-global>
+
+  in vec2 v_uv;
+  in vec3 v_worldPos;
+  in vec3 v_TW0;
+  in vec3 v_TW1;
+  in vec3 v_TW2;
+
+  uniform sampler2D foamTexture;
+  uniform sampler2D waterNormal;
+
+  uniform Constants {
+    vec4 shallowColor;
+    vec4 deepColor;
+    vec4 waveParams;
+    vec4 otherParams;
+  };
+
+  vec3 UnpackNormal(vec4 packedNormal) {
+    return packedNormal.xyz * 2.0 - 1.0;
+  }
+
+  vec3 BlendNormals(vec3 n1, vec3 n2) {
+    return normalize(vec3(n1.xy + n2.xy, n1.z * n2.z));
+  }
+
+  vec4 frag () {
+    vec3 worldViewDir = normalize(cc_cameraPos.xyz - v_worldPos);
+    vec3 worldLightDir = normalize(-cc_mainLitDir.xyz);
+    worldLightDir = vec3(-0.32,0.72,-0.83);
+
+    float degree = texture(foamTexture, v_uv).r;
+    vec4 diffuse = mix(shallowColor, deepColor, degree);
+
+    vec2 uv = v_worldPos.xz;
+    vec2 panner1 = cc_time.x * waveParams.xy + uv * otherParams.y;
+    vec2 panner2 = cc_time.x * waveParams.zw + uv * otherParams.z;
+    vec3 worldNormal = BlendNormals(UnpackNormal(texture(waterNormal, panner1)), UnpackNormal(texture(waterNormal, panner2)));
+    worldNormal = mix(vec3(0, 0, 1), worldNormal, otherParams.x);
+    worldNormal = normalize(vec3(dot(v_TW0, worldNormal), dot(v_TW1, worldNormal), dot(v_TW2, worldNormal)));
+
+
+    // vec3 nmmp1 = texture(waterNormal, panner1).xyz - vec3(0.5);
+    // vec3 nmmp2 = texture(waterNormal, panner2).xyz - vec3(0.5);
+    // vec3 worldNormal;
+    // normalBlend(nmmp1, nmmp2, worldNormal);
+    // float scale = 1.0;
+    // vec3 worldNormal2 = normalize(worldNormal.x * scale * tangentN + worldNormal.y * scale * bitangentN + worldNormal.z * normalN);
+    // worldNormal = mix(vec3(0, 0, 1), worldNormal, otherParams.x);
+    // worldNormal = normalize(worldNormal.x * tangentN + worldNormal.y * bitangentN + worldNormal.z * normalN);
+
+    float NdotV = clamp(dot(worldNormal, worldLightDir), 0.0, 1.0);
+    diffuse.rgb = diffuse.rgb * NdotV;
+
+    vec3 worldHalfDir = normalize(worldLightDir + worldViewDir);
+    vec3 specular = cc_mainLitColor.rgb * 0.5 * pow(max(0.0, dot(worldNormal, worldHalfDir)), 3.81*256.0);
+    diffuse.rgb += specular;
+
+    return diffuse;
+  }
+}%

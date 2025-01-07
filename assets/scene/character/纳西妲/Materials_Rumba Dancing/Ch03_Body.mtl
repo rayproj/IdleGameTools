@@ -1,0 +1,61 @@
+{
+  "__type__": "cc.Material",
+  "_name": "Ch03_Body",
+  "_objFlags": 0,
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "f648964e-8d32-41fc-9ac9-7a1e714dd17b",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {
+      "DCC_APP_NAME": 2,
+      "HAS_EXPORTED_METALLIC": true,
+      "USE_ALBEDO_MAP": true,
+      "USE_SHININESS_MAP": true
+    }
+  ],
+  "_states": [
+    {
+      "rasterizerState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      },
+      "depthStencilState": {}
+    }
+  ],
+  "_props": [
+    {
+      "mainColor": {
+        "__type__": "cc.Color",
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      },
+      "mainTexture": {
+        "__uuid__": "f2405bbd-769a-4b55-981e-52d389c89095@312ba",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "shininessExponent": 20,
+      "shininessExponentMap": {
+        "__uuid__": "f2405bbd-769a-4b55-981e-52d389c89095@5189c",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "emissiveScale": 1,
+      "emissive": {
+        "__type__": "cc.Color",
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      },
+      "metallic": 0.5,
+      "specularFactor": 1,
+      "transparencyFactor": 1
+    }
+  ]
+}

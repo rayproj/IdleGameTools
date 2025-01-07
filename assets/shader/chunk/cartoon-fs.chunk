@@ -28,8 +28,10 @@ vec3 getRampColor(float diff) {
   float q1 = 0.2746;
   float q2 = 0.7254;
 
-  float r1 = 0.0;
-  float r2 = 0.5098;
+  // float r1 = 0.0;
+  float r1 = 0.5;
+  // float r2 = 0.5098;
+  float r2 = 0.9;
   float r3 = 1.0;
   float smoothWidth = 0.01;
   if(diff < q1) {

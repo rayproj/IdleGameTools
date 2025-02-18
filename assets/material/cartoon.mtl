@@ -14,9 +14,31 @@
     },
     {
       "USE_INSTANCING": true
-    }
+    },
+    {
+      "USE_INSTANCING": true
+    },
+    {}
   ],
   "_states": [
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    },
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    },
     {
       "rasterizerState": {},
       "depthStencilState": {},
@@ -46,6 +68,8 @@
         "b": 187,
         "a": 255
       }
-    }
+    },
+    {},
+    {}
   ]
 }

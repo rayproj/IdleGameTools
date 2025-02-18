@@ -19,7 +19,7 @@ CCEffect %{
         cloudColor:     { value: [0, 0, 0, 0], editor: { type: color } }
         cloudTiling:    { value: [1, 1, 1, 1] }
         cloudSpeed:     { value: [0, 0, 0, 0] }
-        unlock:         { value: [0, 0, 0, 0] }
+        unlock:         { value: [0, 0] }
 }%
 
 CCProgram cloud-vs %{
@@ -60,13 +60,13 @@ CCProgram cloud-fs %{
     vec4 cloudColor;
     vec4 cloudTiling;
     vec4 cloudSpeed;
-    vec4 unlock;
+    vec2 unlock;
   };
 
   vec4 frag () {
     vec4 c = texture(cloudTex, v_uv * cloudTiling.xy + cc_time.x * cloudSpeed.xy);
     vec3 c2 = texture(cloudTex, v_uv * cloudTiling.zw + cc_time.x * cloudSpeed.zw).rgb;
-    c.rgb = c.rgb * 0.9 + c2 * 0.1;
+    c.rgb = c.rgb * 0.7 + c2 * 0.3;
 
     float uvDis = length(v_uv - 0.5);
     vec3 range = 100.0 - vec3(unlock.x, unlock.y, unlock.x);

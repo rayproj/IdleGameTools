@@ -10,7 +10,7 @@
   },
   {
     "__type__": "cc.Scene",
-    "_name": "scene-001",
+    "_name": "2dto3d",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -742,7 +742,7 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 480,
+      "x": 479.99999999999994,
       "y": 320,
       "z": 0
     },
@@ -826,7 +826,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 320,
+    "_orthoHeight": 321.30790190735695,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -1145,8 +1145,8 @@
     "__prefab": null,
     "_alignFlags": 45,
     "_target": null,
-    "_left": 0,
-    "_right": 0,
+    "_left": -5.684341886080802e-14,
+    "_right": -5.684341886080802e-14,
     "_top": 0,
     "_bottom": 0,
     "_horizontalCenter": 0,
@@ -1220,10 +1220,10 @@
     },
     "_skyColorLDR": {
       "__type__": "cc.Vec4",
-      "x": 0.452588,
-      "y": 0.607642,
-      "z": 0.755699,
-      "w": 0
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 0.8
     },
     "_skyIllumLDR": 0.8,
     "_groundAlbedoLDR": {
@@ -1277,7 +1277,7 @@
     "_diffuseMapHDR": null,
     "_diffuseMapLDR": null,
     "_enabled": true,
-    "_useHDR": true,
+    "_useHDR": false,
     "_editableMaterial": null,
     "_reflectionHDR": null,
     "_reflectionLDR": null,

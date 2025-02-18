@@ -16,13 +16,54 @@ CCEffect %{
         outLineColor:   { value: [0, 0, 0, 1], editor: { type: color }}
     - vert: cartoon-vs:vert
       frag: cartoon-fs:frag
-      properties:
+      properties: &props
         mainTexture:    { value: white }
         tilingOffset:   { value: [1, 1, 0, 0] }
         mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+        colorScale:     { value: [1, 1, 1], target: colorScaleAndCutoff.xyz }
         specColor:      { value: [1, 1, 1, 1], editor: { type: color, parent: USE_SPECULAR } }
-        specThreshold:  { value: 0.99, target: colorScaleAndCutoff.x, editor: { parent: USE_SPECULAR, slide: true, range: [0.5, 1.0], step: 0.001 }}
+        specThreshold:  { value: 0.99, target: specParams.x, editor: { parent: USE_SPECULAR, slide: true, range: [0.5, 1.0], step: 0.001 }}
         alphaThreshold: { value: 0.5, target: colorScaleAndCutoff.w, editor: { parent: USE_ALPHA_TEST } }
+    - switch: USE_PLANAR_SHADOW_PASS
+      vert: planar-shadow-vs:vert
+      frag: planar-shadow-fs:frag
+      // phase: planarShadow
+      depthStencilState:
+        depthTest: true
+        depthWrite: false
+        stencilTestFront: true
+        stencilFuncFront: not_equal
+        stencilPassOpFront: replace
+        stencilRef: 0x80 # only use the leftmost bit
+        stencilReadMask: 0x80
+        stencilWriteMask: 0x80
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+    - &shadow-caster
+      vert: shadow-caster-vs
+      frag: shadow-caster-fs
+      phase: shadow-caster
+      propertyIndex: 0
+      rasterizerState:
+        cullMode: front
+  - name: transparent
+    passes:
+    - vert: cartoon-vs:vert
+      frag: cartoon-fs:frag
+      depthStencilState:
+        depthTest: true
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties: *props
 }%
 
 CCProgram outline-vs %{
@@ -31,6 +72,28 @@ CCProgram outline-vs %{
 
 CCProgram outline-fs %{
   #include <chunk/outline-fs>
+}%
+
+CCProgram planar-shadow-vs %{
+  #include <chunk/planar-shadow-vs>
+}%
+
+CCProgram planar-shadow-fs %{
+  #include <chunk/planar-shadow-fs>
+}%
+
+CCProgram shadow-caster-vs %{
+  precision highp float;
+  #include <surfaces/effect-macros/render-to-shadowmap>
+  #include <surfaces/includes/common-vs>
+  #include <shading-entries/main-functions/render-to-shadowmap/vs>
+}%
+
+CCProgram shadow-caster-fs %{
+  precision highp float;
+  #include <surfaces/effect-macros/render-to-shadowmap>
+  #include <surfaces/includes/common-fs>
+  #include <shading-entries/main-functions/render-to-shadowmap/fs>
 }%
 
 CCProgram cartoon-vs %{
@@ -57,7 +120,14 @@ CCProgram cartoon-fs %{
       color.rgb += (lightColor.rgb * s.albedo * atten);
     #endif
 
-    vec4 o = vec4(color, 1.0);
+    vec4 o = vec4(color, s.a);
+    o.rgb *= getShadow(v_worldPos, v_worldNormal);
+
+    #if USE_BLINK
+      #if USE_INSTANCING
+        o.rgb = mix(o.rgb, vi_blinkColor.rgb, abs(sin(cc_time.x * 2.5)) * vi_blinkColor.a);
+      #endif
+    #endif
     
     CC_APPLY_FOG(o);
     return o;

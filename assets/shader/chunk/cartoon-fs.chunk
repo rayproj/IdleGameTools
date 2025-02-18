@@ -1,7 +1,7 @@
 precision highp float;
 // #include <legacy/output-standard>
 #include <legacy/fog-fs>
-#include <builtin/uniforms/cc-global>
+#include <chunk/cartoon-common>
 
 #if USE_ALPHA_TEST
   #pragma define-meta ALPHA_TEST_CHANNEL options([a, r, g, b])
@@ -14,39 +14,24 @@ uniform Constant {
   vec4 mainColor;
   vec4 specColor;
   vec4 colorScaleAndCutoff;
+  vec2 specParams;
 };
 
 #if USE_VERTEX_COLOR
   in lowp vec4 v_color;
 #endif
 
+#if USE_BLINK
+  #if USE_INSTANCING
+    in vec4 vi_blinkColor;
+  #endif
+#endif
+
 in vec3 v_worldPos;
 in vec3 v_worldNormal;
 
-vec3 getRampColor(float diff) {
-  float ramp = 0.0;
-  float q1 = 0.2746;
-  float q2 = 0.7254;
-
-  // float r1 = 0.0;
-  float r1 = 0.5;
-  // float r2 = 0.5098;
-  float r2 = 0.9;
-  float r3 = 1.0;
-  float smoothWidth = 0.01;
-  if(diff < q1) {
-    // ramp = r1;
-    ramp = r1 + smoothstep(q1 - smoothWidth, q1, diff) * (r2 - r1);
-  } else if(diff < q2) {
-    // ramp = r2;
-    ramp = r2 + smoothstep(q2 - smoothWidth, q2, diff) * (r3 - r2);
-  } else {
-    ramp = r3;
-  }
-  return vec3(ramp, ramp, ramp);
-}
-
 struct CarToonSurface {
+  float a;
   vec3 albedo;
   vec3 color;
 };
@@ -66,17 +51,8 @@ void surf(out CarToonSurface s) {
   vec3 worldNormal = v_worldNormal;
   vec3 worldLightDir = normalize(-cc_mainLitDir.xyz);
 
-  vec3 albedo = texColor.rgb * mainColor.rgb;
-  // 环境光
-  vec3 ambient = cc_ambientSky.xyz * albedo;
-  // 漫反射
-  float diff = dot(worldNormal, worldLightDir);
-  diff = (diff * 0.5 + 0.5);
-  float luminance = 0.6;
-  vec3 sampledColor = getRampColor(diff) * luminance;
-  vec3 diffuse = cc_mainLitColor.rgb * albedo * sampledColor;
-
-  color.rgb = ambient + diffuse;
+  vec3 albedo = texColor.rgb * mainColor.rgb * colorScaleAndCutoff.xyz;;
+  color.rgb = getCartoonColor(albedo, v_worldNormal, worldLightDir);
 
   // 高光
   #if USE_SPECULAR
@@ -85,11 +61,12 @@ void surf(out CarToonSurface s) {
     float spec = dot(worldNormal, worldHalfDir);
     // spec = pow(spec * 0.5 + 0.5, 8.0);
     spec = spec * 0.5 + 0.5;
-    spec = step(colorScaleAndCutoff.x, spec);
+    spec = step(specParams.x, spec);
     vec3 specular = cc_mainLitColor.rgb * spec * specColor.rgb;
     color.rgb += specular;
   #endif
 
   s.color = color;
+  s.a = texColor.a;
   s.albedo = albedo;
 }

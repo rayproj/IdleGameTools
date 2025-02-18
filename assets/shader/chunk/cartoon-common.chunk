@@ -1,0 +1,64 @@
+#include <builtin/uniforms/cc-global>
+#if CC_RECEIVE_SHADOW
+  #include <legacy/shadow-map-fs>
+  in mediump vec2 v_shadowBias;
+#endif
+
+vec3 getRampColor(float diff) {
+  float ramp = 0.0;
+  float q1 = 0.2746;
+  float q2 = 0.7254;
+
+  // float r1 = 0.0;
+  // float r2 = 0.5098;
+  float r1 = 0.5;
+  float r2 = 0.8;
+  float r3 = 1.0;
+  float smoothWidth = 0.01;
+  if(diff < q1) {
+    // ramp = r1;
+    ramp = r1 + smoothstep(q1 - smoothWidth, q1, diff) * (r2 - r1);
+  } else if(diff < q2) {
+    // ramp = r2;
+    ramp = r2 + smoothstep(q2 - smoothWidth, q2, diff) * (r3 - r2);
+  } else {
+    ramp = r3;
+  }
+  return vec3(ramp, ramp, ramp);
+}
+
+vec3 getCartoonColor(vec3 albedo, vec3 worldNormal, vec3 worldLightDir) {
+  // 环境光
+  vec3 ambient = cc_ambientSky.xyz * albedo;
+  // 漫反射
+  float diff = dot(worldNormal, worldLightDir);
+  diff = (diff * 0.5 + 0.5);
+  float luminance = 0.9;
+  vec3 sampledColor = getRampColor(diff) * luminance;
+  vec3 diffuse = cc_mainLitColor.rgb * albedo * sampledColor;
+
+  return ambient + diffuse;
+}
+
+float shadowCover = 0.7;
+float shadowCtrl = 0.7;
+
+float getShadow (vec3 worldPos, vec3 worldNormal) {
+  vec3 position;
+  HIGHP_VALUE_FROM_STRUCT_DEFINED(position, worldPos);
+  vec3 N = normalize(worldNormal);
+  vec3 L = normalize(cc_mainLitDir.xyz * -1.0);
+  float NL = 0.5 * dot(N, L) + 0.5;
+  float shadow = 1.0;
+  #if CC_RECEIVE_SHADOW && CC_SHADOW_TYPE == CC_SHADOW_MAP
+  if(NL > shadowCover && cc_mainLitDir.w > 0.0) {
+    #if CC_DIR_LIGHT_SHADOW_TYPE == CC_DIR_LIGHT_SHADOW_CASCADED
+      shadow = CCCSMFactorBase(position, N, v_shadowBias);
+    #endif
+    #if CC_DIR_LIGHT_SHADOW_TYPE == CC_DIR_LIGHT_SHADOW_UNIFORM
+      shadow = CCShadowFactorBase(CC_SHADOW_POSITION, N, v_shadowBias);
+    #endif
+  }
+  #endif
+  return mix(shadowCtrl, 1.0, shadow);
+}

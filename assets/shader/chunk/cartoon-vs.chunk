@@ -5,9 +5,22 @@ precision highp float;
 #include <legacy/local-batch>
 #include <legacy/fog-vs>
 
+#include <legacy/shadow-map-vs>
+#if CC_RECEIVE_SHADOW
+  out mediump vec2 v_shadowBias;
+#endif
+
 #if USE_VERTEX_COLOR
   in lowp vec4 a_color;
   out lowp vec4 v_color;
+#endif
+
+#if USE_BLINK
+  #if USE_INSTANCING
+    #pragma format(RGBA8)
+    in vec4 ai_blinkColor;
+    out vec4 vi_blinkColor;
+  #endif
 #endif
 
 out vec2 v_uv;
@@ -32,6 +45,28 @@ vec4 vert () {
   #endif
 
   vec4 worldPos = matWorld * In.position;
+
+  #if CC_DIR_LIGHT_SHADOW_TYPE == CC_DIR_LIGHT_SHADOW_UNIFORM
+    CC_TRANSFER_SHADOW(pos);
+  #endif
+
+  #if CC_RECEIVE_SHADOW
+    v_shadowBias = CCGetShadowBias();
+  #endif
+
+  #if USE_WIND
+    float speed = 0.8;
+    float strength = 0.05;
+    float mask = In.position.z * In.position.z;
+    worldPos.x += sin(cc_time.x * speed) * strength * mask;
+  #endif
+
+  #if USE_BLINK
+    #if USE_INSTANCING
+      vi_blinkColor = ai_blinkColor;
+    #endif
+  #endif
+
   v_worldPos = worldPos.xyz;
   v_worldNormal = normalize((matWorldIT * vec4(In.normal, 0.0)).xyz);
 

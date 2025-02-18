@@ -56,7 +56,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 11
+      "__id__": 10
     },
     "_id": "015fb583-646c-459d-8d12-c44282ed06f4"
   },
@@ -253,9 +253,6 @@
     "_components": [
       {
         "__id__": 8
-      },
-      {
-        "__id__": 10
       }
     ],
     "_prefab": null,
@@ -341,46 +338,24 @@
     "_probeCubemap": null
   },
   {
-    "__type__": "cc.Animation",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 7
-    },
-    "_enabled": true,
-    "__prefab": null,
-    "playOnLoad": true,
-    "_clips": [
-      {
-        "__uuid__": "cbba2223-c04f-4e34-a345-235dc3d3a1d0",
-        "__expectedType__": "cc.AnimationClip"
-      }
-    ],
-    "_defaultClip": {
-      "__uuid__": "cbba2223-c04f-4e34-a345-235dc3d3a1d0",
-      "__expectedType__": "cc.AnimationClip"
-    },
-    "_id": "68sTB4TRhLZrYjXQKxRQQ2"
-  },
-  {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 12
+      "__id__": 11
     },
     "shadows": {
-      "__id__": 13
+      "__id__": 12
     },
     "_skybox": {
-      "__id__": 14
+      "__id__": 13
     },
     "fog": {
-      "__id__": 15
+      "__id__": 14
     },
     "octree": {
-      "__id__": 16
+      "__id__": 15
     },
     "lightProbeInfo": {
-      "__id__": 17
+      "__id__": 16
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false
